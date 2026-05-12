@@ -6,10 +6,11 @@ Projeto desenvolvido como parte do aprendizado de C — do zero, sem frameworks,
 
 ## O que faz
 
-- Lê a porta de um arquivo de configuração (`servidor.config`)
-- Abre um socket TCP e escuta conexões
-- Aceita requisições HTTP do navegador
-- Lê um arquivo HTML do disco e serve como resposta
+- Abre um socket TCP e escuta conexões na porta configurada
+- Parseia a requisição HTTP e extrai a rota
+- Serve arquivos estáticos da pasta `public/`
+- Detecta o tipo do arquivo e responde com o `Content-Type` correto
+- Responde `404 Not Found` para arquivos inexistentes
 - Loop contínuo — aceita múltiplas conexões sem reiniciar
 
 ## Como usar
@@ -20,51 +21,57 @@ Projeto desenvolvido como parte do aprendizado de C — do zero, sem frameworks,
 gcc servidor.c -o servidor
 ```
 
-### 2. Configure a porta
+### 2. Crie os arquivos
 
-Crie o arquivo `servidor.config` com o conteúdo:
+Coloque seus arquivos HTML, CSS e JS dentro da pasta `public/`:
 
 ```
-Porta do servidor: 8080
+.
+├── servidor.c
+├── servidor
+└── public/
+    ├── index.html
+    ├── sobre.html
+    └── css/
+        └── style.css
 ```
 
-Ou rode o servidor uma vez com a opção de trocar a porta — ele gera o arquivo automaticamente.
-
-### 3. Crie o HTML
-
-Coloque um arquivo `index.html` na mesma pasta do executável.
-
-### 4. Rode
+### 3. Rode
 
 ```bash
 ./servidor
 ```
 
-Acesse `http://localhost:8080` no navegador.
-
-## Estrutura
-
-```
-.
-├── servidor.c        # código do servidor
-├── servidor.config   # porta configurada
-└── index.html        # página servida
-```
+Acesse `http://localhost:4334` no navegador.
 
 ## Como funciona
 
 ```
 socket()   → cria o ponto de conexão TCP
-bind()     → associa à porta configurada
+bind()     → associa à porta 4334
 listen()   → começa a escutar
 accept()   → aceita uma conexão do navegador
 read()     → lê a requisição HTTP
-fopen()    → abre o index.html
-write()    → envia a resposta HTTP com o HTML
+sscanf()   → extrai o método e a rota (GET /pagina.html)
+fopen()    → abre o arquivo em public/
+write()    → envia a resposta HTTP com o arquivo
 close()    → fecha a conexão e volta pro accept()
 ```
 
-O protocolo HTTP é implementado manualmente — a resposta segue o formato:
+## Content-Types suportados
+
+| Extensão | Content-Type |
+|----------|-------------|
+| `.html` | text/html |
+| `.css` | text/css |
+| `.js` | application/javascript |
+| `.png` | image/png |
+| `.jpg` | image/jpeg |
+| `.ico` | image/x-icon |
+
+## Protocolo HTTP na mão
+
+A resposta segue o formato obrigatório:
 
 ```
 HTTP/1.1 200 OK\r\n
@@ -73,13 +80,14 @@ Content-Type: text/html\r\n
 <conteúdo do arquivo>
 ```
 
+A linha em branco (`\r\n`) separa os headers do corpo — sem ela o navegador não sabe onde o HTML começa.
+
 ## Próximos passos
 
-- [ ] Parsear o caminho da requisição (`GET /pagina.html`)
-- [ ] Servir arquivos diferentes por rota
-- [ ] Resposta 404 para arquivos inexistentes
+- [ ] Arquivo de configuração para porta dinâmica
 - [ ] Header `Content-Length`
 - [ ] Refatorar com funções
+- [ ] Suporte a arquivos binários (imagens)
 
 ## Motivação
 

@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/caiquedadonas/Documents/01. Projects/Servidor http/servidor'
+relocations:     []
+...

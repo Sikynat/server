@@ -45,8 +45,15 @@ int main(void) {
             char metodo[10], rota[256];
             sscanf(buffer, "%s %s", metodo, rota);
 
+          
+
             // monta o caminho
             char caminho[512];
+
+            printf("Rota: %s\n", rota);
+            printf("Caminho: %s\n", caminho);
+
+            
             if (strcmp(rota, "/") == 0) {
                 strcpy(caminho, "./public/index.html");
             } else {
@@ -57,6 +64,20 @@ int main(void) {
             char html[4096] = {0};
 
             FILE *f = fopen(caminho, "r");
+
+            char *ext = strrchr(caminho, '.');
+
+            char *content_type = "text/html"; // padrão
+            if (ext != NULL) {
+            if (strcmp(ext, ".css") == 0)  content_type = "text/css";
+            if (strcmp(ext, ".js") == 0)   content_type = "application/javascript";
+            if (strcmp(ext, ".png") == 0)  content_type = "image/png";
+            if (strcmp(ext, ".jpg") == 0)  content_type = "image/jpeg";
+            if (strcmp(ext, ".ico") == 0)  content_type = "image/x-icon";
+
+
+
+}
 
             if(f == NULL){
                 char *not_found =
@@ -76,9 +97,9 @@ int main(void) {
             char resposta[5000];
             sprintf(resposta,
             "HTTP/1.1 200 OK\r\n"
-            "Content-Type: text/html\r\n"
+            "Content-Type: %s\r\n"
             "\r\n"
-            "%s", html);
+            "%s", content_type, html);
 
             write(cliente, resposta, strlen(resposta));
 
