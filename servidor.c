@@ -37,15 +37,41 @@ int main(void) {
             // 5. Accept — espera uma conexão
             int cliente = accept(servidor, NULL, NULL);
 
-            char html[4096];
-            FILE *f = fopen("index.html", "r");
+            // lê a requisição
+            char buffer[1024] = {0};
+            read(cliente, buffer, sizeof(buffer));
+
+            // extrai a rota
+            char metodo[10], rota[256];
+            sscanf(buffer, "%s %s", metodo, rota);
+
+            // monta o caminho
+            char caminho[512];
+            if (strcmp(rota, "/") == 0) {
+                strcpy(caminho, "./public/index.html");
+            } else {
+                sprintf(caminho, "./public%s", rota);
+            }
+
+            // abre o arquivo
+            char html[4096] = {0};
+
+            FILE *f = fopen(caminho, "r");
+
+            if(f == NULL){
+                char *not_found =
+                "HTTP/1.1 404 Not Found\r\n"
+                "Content-Type: text/html\r\n"
+                "\r\n"
+                "<h1>404 - Pagina nao encontrada</h1>";
+                write(cliente, not_found, strlen(not_found));
+                close(cliente);
+                continue;
+            }
+
+
             fread(html, 1, sizeof(html), f);
             fclose(f);
-
-            // 6. Lê o que o cliente mandou
-            char buffer[1024];
-            read(cliente, buffer, sizeof(buffer));
-            printf("Recebi:\n%s\n", buffer);
 
             char resposta[5000];
             sprintf(resposta,
