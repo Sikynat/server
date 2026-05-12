@@ -50,8 +50,7 @@ int main(void) {
             // monta o caminho
             char caminho[512];
 
-            printf("Rota: %s\n", rota);
-            printf("Caminho: %s\n", caminho);
+            
 
             
             if (strcmp(rota, "/") == 0) {
@@ -59,6 +58,9 @@ int main(void) {
             } else {
                 sprintf(caminho, "./public%s", rota);
             }
+
+            printf("Rota: %s\n", rota);
+            printf("Caminho: %s\n", caminho);
 
             // abre o arquivo
             char html[4096] = {0};
@@ -75,19 +77,29 @@ int main(void) {
             if (strcmp(ext, ".jpg") == 0)  content_type = "image/jpeg";
             if (strcmp(ext, ".ico") == 0)  content_type = "image/x-icon";
 
-
-
 }
 
-            if(f == NULL){
-                char *not_found =
-                "HTTP/1.1 404 Not Found\r\n"
-                "Content-Type: text/html\r\n"
-                "\r\n"
-                "<h1>404 - Pagina nao encontrada</h1>";
-                write(cliente, not_found, strlen(not_found));
-                close(cliente);
-                continue;
+            if (f == NULL) {
+
+            char html_404[4096] = {0};
+            FILE *err = fopen("./public/internal/erros/404.html", "r");
+
+            if (err != NULL) {
+                fread(html_404, 1, sizeof(html_404), err);
+                fclose(err);
+            } else {
+                strcpy(html_404, "<h1>404 - Pagina nao encontrada</h1>");
+            }
+
+            char resposta_404[5000];
+            sprintf(resposta_404,
+            "HTTP/1.1 404 Not Found\r\n"
+            "Content-Type: text/html\r\n"
+            "\r\n"
+            "%s", html_404);
+            write(cliente, resposta_404, strlen(resposta_404));
+            close(cliente);
+            continue;
             }
 
 
